@@ -1,0 +1,116 @@
+networks:
+  andesstay-net:
+    driver: bridge
+
+# Declaramos el disco duro virtual para que los datos sobrevivan a los reinicios
+volumes:
+  andesstay-db-data:
+
+services:
+  andesstay-db:
+    image: mysql:8.0
+    container_name: andesstay-mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=andesstay_db
+      - MYSQL_ROOT_PASSWORD=root
+    # Enlazamos la base de datos al disco duro virtual
+    volumes:
+      - andesstay-db-data:/var/lib/mysql
+    networks:
+      - andesstay-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: andesstay-rabbitmq
+    restart: always
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - andesstay-net
+
+  ms-andesstay-bff:
+    build:
+      context: ../ms-andesstay-bff/ms-andesstay-bff
+      dockerfile: Dockerfile
+    container_name: ms-andesstay-bff
+    restart: on-failure
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - RESERVATIONS_SERVICE_URL=http://ms-andesstay-reservations:8081/api/reservations
+    depends_on:
+      - ms-andesstay-reservations
+    networks:
+      - andesstay-net
+
+  ms-andesstay-reservations:
+    build:
+      context: ../reservations/reservations
+      dockerfile: Dockerfile
+    container_name: ms-andesstay-reservations
+    restart: on-failure
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+      - andesstay-db
+    networks:
+      - andesstay-net
+
+  ms-andesstay-notify:
+    build:
+      context: ../notify/notify
+      dockerfile: Dockerfile
+    container_name: ms-andesstay-notify
+    restart: on-failure
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+    networks:
+      - andesstay-net
+
+  ms-andesstay-admin-mq:
+    build:
+      context: ../admin-mq/admin-mq
+      dockerfile: Dockerfile
+    container_name: ms-andesstay-admin-mq
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+    networks:
+      - andesstay-net
