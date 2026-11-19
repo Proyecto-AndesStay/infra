@@ -272,7 +272,11 @@ services:
     environment:
       - SERVER_PORT=8080
       - RESERVATIONS_SERVICE_URL=http://ms-andesstay-reservations:8081/api/reservations
+      - ADMINMQ_SERVICE_URL=http://ms-andesstay-admin-mq:8083
+      - AUDIT_SERVICE_URL=http://ms-andesstay-audit:8085/api/audit
     depends_on:
       - ms-andesstay-reservations
+      - ms-andesstay-admin-mq
+      - ms-andesstay-audit
     networks:
       - andesstay-net
