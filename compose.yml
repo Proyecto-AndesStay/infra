@@ -12,6 +12,7 @@ services:
   zookeeper-1:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper-1
+    restart: always
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -26,6 +27,7 @@ services:
   zookeeper-2:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper-2
+    restart: always
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_CLIENT_PORT: 2182
@@ -40,6 +42,7 @@ services:
   zookeeper-3:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper-3
+    restart: always
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_CLIENT_PORT: 2183
@@ -54,6 +57,7 @@ services:
   kafka-1:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka-1
+    restart: always
     depends_on:
       - zookeeper-1
       - zookeeper-2
@@ -76,6 +80,7 @@ services:
   kafka-2:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka-2
+    restart: always
     depends_on:
       - zookeeper-1
       - zookeeper-2
@@ -98,6 +103,7 @@ services:
   kafka-3:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka-3
+    restart: always
     depends_on:
       - zookeeper-1
       - zookeeper-2
@@ -120,6 +126,7 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
+    restart: always
     depends_on:
       - kafka-1
       - kafka-2
@@ -172,7 +179,7 @@ services:
       context: ../reservations/reservations
       dockerfile: Dockerfile
     container_name: ms-andesstay-reservations
-    restart: on-failure
+    restart: always
     ports:
       - "8081:8081"
     environment:
@@ -194,7 +201,7 @@ services:
       context: ../notify/notify
       dockerfile: Dockerfile
     container_name: ms-andesstay-notify
-    restart: on-failure
+    restart: always
     ports:
       - "8082:8082"
     environment:
@@ -213,7 +220,7 @@ services:
       context: ../admin-mq/admin-mq
       dockerfile: Dockerfile
     container_name: ms-andesstay-admin-mq
-    restart: on-failure
+    restart: always
     ports:
       - "8083:8083"
     environment:
@@ -234,7 +241,7 @@ services:
       context: ../ms-andesstay-audit/ms-andesstay-audit
       dockerfile: Dockerfile
     container_name: ms-andesstay-audit
-    restart: on-failure
+    restart: always
     ports:
       - "8085:8085"
     environment:
@@ -250,7 +257,7 @@ services:
       context: ../ms-andesstay-report/ms-andesstay-report
       dockerfile: Dockerfile
     container_name: ms-andesstay-report
-    restart: on-failure
+    restart: always
     ports:
       - "8086:8086"
     environment:
@@ -266,7 +273,7 @@ services:
       context: ../ms-andesstay-bff/ms-andesstay-bff
       dockerfile: Dockerfile
     container_name: ms-andesstay-bff
-    restart: on-failure
+    restart: always
     ports:
       - "8080:8080"
     environment:
